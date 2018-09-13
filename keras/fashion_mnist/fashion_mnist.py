@@ -6,6 +6,7 @@ from matplotlib import pyplot as plt
 from tensorflow import keras
 
 from matplotlib.font_manager import FontProperties
+
 font = FontProperties(fname='/Library/Fonts/Songti.ttc', size=10)
 
 # https://www.tensorflow.org/tutorials/keras/basic_classification
@@ -28,6 +29,7 @@ model = keras.Sequential([
 model.compile(optimizer=tf.train.AdamOptimizer(),
               loss=keras.losses.sparse_categorical_crossentropy,
               metrics=["accuracy"])
+
 
 def plot_value_array(img, predictions_array):
     argmax = int(np.argmax(predictions_array))
