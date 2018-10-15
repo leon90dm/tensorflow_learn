@@ -1,7 +1,7 @@
 import keras
 import numpy as np
 
-from rl.deep_q.maze_env import Maze
+from rl.env.maze_env import Maze
 
 
 class DeepQNetwork:
@@ -51,7 +51,7 @@ class DeepQNetwork:
     def choose_action(self, observation):
         if np.random.uniform() < self.epsilon:
             observation = observation[np.newaxis, :]
-            pred = self.eval_model.predict_on_batch(observation)
+            pred = self.eval_model.predict_on_batch(observation)[0]
             action = np.argmax(pred)
         else:
             action = np.random.randint(0, self.n_actions)
@@ -79,7 +79,7 @@ class DeepQNetwork:
         loss = self.eval_model.train_on_batch(batch_memory[:, : self.n_features], y=q_target)
 
         # increasing epsilon
-        self.epsilon = self.epsilon + 0.001 if self.epsilon < self.epsilon_max else self.epsilon_max
+        self.epsilon = self.epsilon + 0.005 if self.epsilon < self.epsilon_max else self.epsilon_max
         self.learn_step += 1
         return loss
 
@@ -110,13 +110,14 @@ def run_maze():
 
             deep_q.save_transition(observation, action, reward, 0 if done else 1, observation_)
 
-            if step > 200:
-                loss = deep_q.learn()
-                if step % 50 == 0:
-                    print("loss:{}, epsilon:{}, mem_offset:{}"
-                          .format(loss,
-                                  deep_q.epsilon,
-                                  deep_q.memory_offset))
+            if step > 200 and step % 10 == 0:
+                if deep_q.epsilon < deep_q.epsilon_max:
+                    loss = deep_q.learn()
+                    if step % 50 == 0:
+                        print("loss:{}, epsilon:{}, mem_offset:{}"
+                              .format(loss,
+                                      deep_q.epsilon,
+                                      deep_q.memory_offset))
 
             # swap observation
             observation = observation_

@@ -22,6 +22,8 @@ else:
 UNIT = 40   # pixels
 MAZE_H = 4  # grid height
 MAZE_W = 4  # grid width
+HELL_R = -5
+WIN_R = 5
 
 
 class Maze(tk.Tk, object):
@@ -94,18 +96,32 @@ class Maze(tk.Tk, object):
     def step(self, action):
         s = self.canvas.coords(self.rect)
         base_action = np.array([0, 0])
+        done = False
+        reward = 0
         if action == 0:   # up
             if s[1] > UNIT:
                 base_action[1] -= UNIT
+            else:
+                done = True
+                reward = HELL_R
         elif action == 1:   # down
             if s[1] < (MAZE_H - 1) * UNIT:
                 base_action[1] += UNIT
+            else:
+                done = True
+                reward = HELL_R
         elif action == 2:   # right
             if s[0] < (MAZE_W - 1) * UNIT:
                 base_action[0] += UNIT
+            else:
+                done = True
+                reward = HELL_R
         elif action == 3:   # left
             if s[0] > UNIT:
                 base_action[0] -= UNIT
+            else:
+                done = True
+                reward = HELL_R
 
         self.canvas.move(self.rect, base_action[0], base_action[1])  # move agent
 
@@ -113,12 +129,12 @@ class Maze(tk.Tk, object):
 
         # reward function
         if next_coords == self.canvas.coords(self.oval):
-            reward = 1
+            reward = WIN_R
             done = True
         elif next_coords in [self.canvas.coords(self.hell1)]:
-            reward = -1
+            reward = HELL_R
             done = True
-        else:
+        elif not done:
             reward = 0
             done = False
         s_ = (np.array(next_coords[:2]) - np.array(self.canvas.coords(self.oval)[:2]))/(MAZE_H*UNIT)
